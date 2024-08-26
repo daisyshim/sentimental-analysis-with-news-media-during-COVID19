@@ -1,0 +1,895 @@
+---
+title: "News_company"
+output: html_document
+date: '2023-07-26'
+---
+
+## library
+```{r}
+library(tidytext)
+library(tidyr)
+library(multilinguer)
+library(KoNLP)
+library(rJava)
+library(readxl)
+library(readr)
+library(rlang)
+library(dplyr)
+library(stringr)
+library(tibble)
+library(epubr)
+library(RcppMeCab)
+library(ggplot2)
+```
+
+
+## data
+```{r}
+getwd()
+setwd('C:/R programming/NewsResult')
+
+
+#2
+News2_1 <- read_excel("2월/NewsResult_20200201-20200206.xlsx")
+News2_2 <- read_excel("2월/NewsResult_20200207-20200213.xlsx")
+News2_3 <- read_excel("2월/NewsResult_20200214-20200220.xlsx")
+News2_4 <- read_excel("2월/NewsResult_20200221-20200224.xlsx")
+News2_5 <- read_excel("2월/NewsResult_20200225-20200226.xlsx")
+News2_6 <- read_excel("2월/NewsResult_20200227-20200229.xlsx")
+
+
+#3
+News3_1 <- read_excel("3월/NewsResult_20200301-20200303.xlsx")
+News3_2 <- read_excel("3월/NewsResult_20200304-20200305.xlsx")
+News3_3 <- read_excel("3월/NewsResult_20200306-20200309.xlsx")
+News3_4 <- read_excel("3월/NewsResult_20200310-20200311.xlsx")
+News3_5 <- read_excel("3월/NewsResult_20200312-20200315.xlsx")
+News3_6 <- read_excel("3월/NewsResult_20200316-20200317.xlsx")
+News3_7 <- read_excel("3월/NewsResult_20200318-20200319.xlsx")
+News3_8 <- read_excel("3월/NewsResult_20200320-20200323.xlsx")
+News3_9 <- read_excel("3월/NewsResult_20200324-20200325.xlsx")
+News3_10 <- read_excel("3월/NewsResult_20200326-20200329.xlsx")
+News3_11 <- read_excel("3월/NewsResult_20200330-20200331.xlsx")
+
+
+folder_path <- "4월"  
+file_list <- list.files(path = folder_path, full.names = TRUE)
+
+for(i in 1:length(file_list)) {
+  folder_path <- file_list[i]
+  assign(paste0("News4_", i), read_excel(folder_path))
+}
+
+
+folder_path <- "5월"  
+file_list <- list.files(path = folder_path, full.names = TRUE)
+
+for(i in 1:length(file_list)) {
+  folder_path <- file_list[i]
+  assign(paste0("News5_", i), read_excel(folder_path))
+}
+
+
+folder_path <- "6월"  
+file_list <- list.files(path = folder_path, full.names = TRUE)
+
+for(i in 1:length(file_list)) {
+  folder_path <- file_list[i]
+  assign(paste0("News6_", i), read_excel(folder_path))
+}
+
+
+folder_path <- "7월"  
+file_list <- list.files(path = folder_path, full.names = TRUE)
+
+for(i in 1:length(file_list)) {
+  folder_path <- file_list[i]
+  assign(paste0("News7_", i), read_excel(folder_path))
+}
+
+
+folder_path <- "8월"  
+file_list <- list.files(path = folder_path, full.names = TRUE)
+
+for(i in 1:length(file_list)) {
+  folder_path <- file_list[i]
+  assign(paste0("News8_", i), read_excel(folder_path))
+}
+
+
+folder_path <- "9월"  
+file_list <- list.files(path = folder_path, full.names = TRUE)
+
+for(i in 1:length(file_list)) {
+  folder_path <- file_list[i]
+  assign(paste0("News9_", i), read_excel(folder_path))
+}
+
+
+folder_path <- "10월"  
+file_list <- list.files(path = folder_path, full.names = TRUE)
+
+for(i in 1:length(file_list)) {
+  folder_path <- file_list[i]
+  assign(paste0("News10_", i), read_excel(folder_path))
+}
+
+
+folder_path <- "11월"  
+file_list <- list.files(path = folder_path, full.names = TRUE)
+
+for(i in 1:length(file_list)) {
+  folder_path <- file_list[i]
+  assign(paste0("News11_", i), read_excel(folder_path))
+}
+
+
+folder_path <- "12월"  
+file_list <- list.files(path = folder_path, full.names = TRUE)
+
+for(i in 1:length(file_list)) {
+  folder_path <- file_list[i]
+  assign(paste0("News12_", i), read_excel(folder_path))
+}
+
+
+folder_path <- "21_1월"  
+file_list <- list.files(path = folder_path, full.names = TRUE)
+
+for(i in 1:length(file_list)) {
+  folder_path <- file_list[i]
+  assign(paste0("News1_", i), read_excel(folder_path))
+}
+
+# 파일 읽기
+data_list <- lapply(file_list, read_excel)
+data_list[[1]]
+
+
+News2 <- bind_rows(News2_1, News2_2, News2_3, News2_4, News2_5, News2_6)
+News3 <- bind_rows(News3_1, News3_2, News3_3, News3_4, News3_5, News3_6, News3_7, News3_8, News3_9, News3_10, News3_11)
+News4 <- bind_rows(News4_1, News4_2, News4_3, News4_4, News4_5, News4_6, News4_7, News4_8)
+News5 <- bind_rows(News5_1, News5_2, News5_3, News5_4, News5_5, News5_6, News5_7)
+News6 <- bind_rows(News6_1, News6_2, News6_3, News6_4, News6_5, News6_6)
+News7 <- bind_rows(News7_1, News7_2, News7_3, News7_4, News7_5, News7_6)
+News8 <- bind_rows(News8_1, News8_2, News8_3, News8_4, News8_5, News8_6)
+News9 <- bind_rows(News9_1, News9_2, News9_3, News9_4, News9_5, News9_6, News9_7)
+News10 <- bind_rows(News10_1, News10_2, News10_3, News10_4, News10_5)
+News11 <- bind_rows(News11_1, News11_2, News11_3, News11_4, News11_5, News11_6)
+News12 <- bind_rows(News12_1, News12_2, News12_3, News12_4, News12_5, News12_6, News12_7, News12_8)
+News1 <- bind_rows(News1_1, News1_2, News1_3, News1_4, News1_5, News1_6)
+
+News <- bind_rows(News2, News3, News4, News5, News6, News7, News8, News9, News10, News11, News12, News1)
+News <- News[order(News$일자), ]
+
+head(News)
+tail(News)
+```
+
+## lexicon
+```{r}
+#9번째에 있는 파일 가져오기
+senti_name_v <- list.files("data/KnuSentiLex-master/.")[9]
+senti_dic_df <- read_tsv(str_c("data/KnuSentiLex-master/", senti_name_v), col_names = F)
+head(senti_dic_df)
+
+#열 이름 변경
+senti_dic_df <- senti_dic_df %>% 
+  rename(word = X1, sScore = X2)
+
+#이상치 변경
+senti_dic_df %>% 
+  filter(!is.na(sScore)) %>% 
+  add_row(word = "갈등", sScore = -1) -> senti_dic_df 
+
+#감성사전 저장
+knu_dic_df <- senti_dic_df %>% 
+  filter(!is.na(sScore))
+```
+
+
+## 토큰화, 형태소 추출
+```{r}
+#단어 단위 분석 후 결합
+s_time <- Sys.time()
+News %>%
+  unnest_tokens(output = word,
+                input = 제목) %>%
+  left_join(knu_dic_df, by = "word") -> News_t
+elap_time_xxx <- Sys.time() - s_time
+
+#결측값 0
+News_t$sScore[is.na(News_t$sScore)] <- 0
+News_t
+```
+
+
+
+```{r}
+#제목 붙이기
+News_t <- left_join(News_t, News[, c("뉴스 식별자", "제목")], by = "뉴스 식별자")
+
+News_t1 <- News_t
+
+#'뉴스 식별자', 일자, 언론사, 기고자, 기관, 제목, pos_done, sScore만 따로 s_result에 저장
+s_result <- News_t %>% 
+  select('뉴스 식별자', 일자, 언론사, 기고자, 기관, 제목, word, sScore)
+```
+
+## 감성변화
+```{r}
+s_result <- s_result %>% rename(식별자 = '뉴스 식별자')
+
+
+# 식별자가 같은 뉴스들의 sScore 합을 계산
+data <- s_result %>%
+  group_by(식별자) %>%
+  summarise(일자 = first(일자), 제목 = first(제목), 언론사 = first(언론사), total_sScore = sum(sScore))
+
+data
+```
+### 언론사별 출판 기사 개수
+```{r}
+# 언론사별 하루에 출판한 기사의 개수
+article_count <- data %>%
+  group_by(일자, 언론사) %>%
+  summarise(article_count = n())
+
+article_count
+```
+```{r}
+#월간 출판 기사 개수
+# 월별 언론사의 article_count 합을 구함
+monthly_sum <- article_count %>%
+  mutate(YearMonth = format(일자, "%Y-%m")) %>%
+  group_by(YearMonth, 언론사) %>%
+  summarise(total_article_count = sum(article_count))
+
+#7개(3사, 조선, 중앙, 한겨례, 경향)의 월별 기사 개수
+monthly_sum %>% 
+  filter(언론사 %in% wanted_media) -> month_count_c
+
+month_count_c
+```
+
+
+```{r}
+# 1년간 출판한 기사 개수
+total_article_count <- data %>%
+  group_by(언론사) %>%
+  summarise(total_articles = n_distinct(식별자))
+
+total_article_count %>% arrange(desc(total_articles)) -> year_count_c
+
+year_count_c
+```
+
+### 언론사별 일일 감성 점수
+```{r}
+# 날짜에 따라 언론사가 발행한 sScore의 합(언론사 전체)
+sScore_sum <- data %>%
+  group_by(일자, 언론사) %>%
+  summarise(total_sScore = sum(total_sScore))
+
+sScore_sum
+```
+
+```{r}
+# 언론사 목록 제작
+wanted_media <- c("조선일보", "중앙일보", "동아일보", "한겨레", "경향신문", "머니투데이", "파이낸셜뉴스", "KBS", "SBS", "MBC", "YTN")
+
+# 언론사들의 데이터만 필터링
+filtered_data <- data %>%
+  filter(언론사 %in% wanted_media)
+
+# 그룹화
+daily_sScore_sum <- filtered_data %>%
+  group_by(일자, 언론사) %>%
+  summarise(total_sScore = sum(total_sScore))
+
+# 결과 출력
+daily_sScore_sum
+```
+
+```{r}
+# 그래프
+ggplot(daily_sScore_sum, aes(x = 일자, y = total_sScore, group = 언론사, color = 언론사)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  theme_minimal() +
+  labs(x = "일자", y = "감성점수 합", color = "언론사") +
+  facet_wrap(~ 언론사, ncol = 2, scales = "free_y")
+```
+
+
+```{r}
+# 언론사 목록
+wanted_media <- c("조선일보", "중앙일보", "한겨레", "경향신문", "KBS", "SBS", "MBC")
+
+# 언론사들의 데이터만 필터링
+filtered_data <- data %>%
+  filter(언론사 %in% wanted_media)
+
+# 그룹화
+daily_sScore_sum <- filtered_data %>%
+  group_by(일자, 언론사) %>%
+  summarise(total_sScore = sum(total_sScore))
+
+# 결과 출력
+daily_sScore_sum
+```
+
+```{r}
+# 그래프
+ggplot(daily_sScore_sum, aes(x = 일자, y = total_sScore, group = 언론사, color = 언론사)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  theme_minimal() +
+  labs(x = "일자", y = "감성점수 합", color = "언론사") +
+  facet_wrap(~ 언론사, ncol = 2, scales = "free_y") -> k
+k
+
+ggsave("언론사 일일 감성 점수.png", plot = k, width = 10, height = 6, dpi = 300)
+```
+
+
+```{r}
+# 그래프를 그리는 함수 정의
+draw_line_graph <- function(media_data, media_name) {
+  p <- ggplot(media_data, aes(x = 일자, y = total_sScore, group = 언론사)) +
+    geom_line(color = "black") +
+    geom_point(color = "black") +
+    labs(title = paste("언론사:", media_name, "일별 감성점수 합 (꺾은선 그래프)"),
+         x = "일자",
+         y = "감성점수 합") +
+    theme_minimal() +
+    theme(plot.background = element_rect(fill = "white"),
+          panel.background = element_rect(fill = "white"),
+          panel.border = element_blank(),
+          text = element_text(color = "black"))
+
+  print(p)
+}
+
+# 언론사별로 그래프를 출력하기 위한 for문
+for (media in unique(daily_sScore_sum$언론사)) {
+  media_data <- filter(daily_sScore_sum, 언론사 == media)
+  draw_line_graph(media_data, media)
+}
+```
+
+
+
+
+### 월별 감성점수
+```{r}
+# 일자 열 날짜 형식으로 변환
+data$일자 <- as.Date(data$일자, format = "%Y%m%d")
+
+# 월별 감성 점수의 합
+monthly_sScore_sum <- data %>%
+  group_by(언론사, YearMonth = format(일자, "%Y-%m")) %>%
+  summarise(total_sScore_monthly = sum(total_sScore))
+
+# 결과 출력
+monthly_sScore_sum
+```
+
+
+```{r}
+# 월별 감성 점수 합(언론사 7개)
+wanted_media_data <- monthly_sScore_sum %>%
+  filter(언론사 %in% wanted_media)
+
+wanted_media_data
+```
+#### 월별 언론사 감성 점수 총합
+```{r}
+# 그래프에 표시할 언론사의 개수
+num_media <- length(unique(wanted_media_data$언론사))
+
+# 원하는 그리드 형태로 그래프 출력
+ggplot(wanted_media_data, aes(x = YearMonth, y = total_sScore_monthly, fill = 언론사)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~ 언론사, ncol = 4, nrow = 2) +  # 2x4 그리드 설정
+  labs(x = "월", y = "월별 감성 점수 합") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_discrete()  # 언론사별 색상 설정
+```
+
+```{r}
+# 언론사 하나씩 막대그래프
+for (media in unique(wanted_media_data$언론사)) {
+  media_data <- wanted_media_data %>%
+    filter(언론사 == media)
+  
+  # 월별 감성 점수의 합
+  p <- ggplot(media_data, aes(x = YearMonth, y = total_sScore_monthly, fill = 언론사)) +
+    geom_bar(stat = "identity", position = "dodge", fill = "gray") +
+    theme_minimal() +
+    labs(title = paste("언론사:", media), x = "월별", y = "감성 점수 합") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+  print(p)
+}
+```
+
+#### 언론사별 월별 감성점수 평균(7개)
+```{r}
+#월별 언론사 기사 개수 합, 월별 언론사 감성 점수 총합
+month_count_c; wanted_media_data
+
+# 두 데이터 프레임을 언론사와 YearMonth로 결합
+merged_data <- left_join(month_count_c, wanted_media_data, by = c("언론사", "YearMonth"))
+
+# 결과 확인
+print(merged_data)
+
+#평균 구하기
+merged_data %>%
+  mutate(mean_emotion_m = total_sScore_monthly / total_article_count) -> merged_data
+
+merged_data
+```
+
+```{r}
+graph_list <- merged_data %>%
+  group_by(언론사) %>%
+  nest() %>%
+  mutate(graph = map2(data, 언론사, function(data, media) {
+    ggplot(data, aes(x = YearMonth, y = mean_emotion_m, group = 1)) +
+      geom_line() +
+      labs(title = media, x = "YearMonth", y = "mean_emotion_m") +  # x, y 라벨 추가
+      theme_minimal() +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  }))
+
+# 그래프를 2x4 그리드로 출력
+grid.arrange(grobs = graph_list$graph, ncol = 4)
+
+
+ggsave("언론사별 월별 감성점수 평균.png", grid.arrange(grobs = graph_list$graph, ncol = 4), width = 10, height = 6, dpi = 300)
+```
+#### 언론사 중첩
+```{r}
+graph <- merged_data %>%
+  ggplot(aes(x = YearMonth, y = mean_emotion_m, group = 언론사, color = 언론사, linetype = 언론사)) +
+  geom_line(size = 1.2) +
+  labs(x = "월", y = "") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_linetype_manual(values = rep("solid", length(unique(merged_data$언론사))))
+
+print(graph)
+
+
+ggsave("언론사 월별 평균 감성점수 중첩.png", plot = graph, width = 10, height = 6, dpi = 300)
+```
+
+
+#### 언론사별 긍정/부정/중립 문서 비율(+수치 포함)
+```{r}
+# total_sScore가 양수면 긍정, 음수면 부정, 0이면 중립으로 분류
+filtered_data <- filtered_data %>%
+  mutate(sentiment = ifelse(total_sScore > 0, "긍정", ifelse(total_sScore < 0, "부정", "중립")))
+
+# 언론사별로 긍정, 부정, 중립 문서의 비율
+sentiment_ratio <- filtered_data %>%
+  group_by(언론사, sentiment) %>%
+  summarise(count = n()) %>%
+  mutate(percentage = count / sum(count) * 100)
+
+# 원그래프로 언론사별 긍정, 부정, 중립 문서의 비율을 1x7 그리드로 시각화
+ggplot(sentiment_ratio, aes(x = "", y = percentage, fill = sentiment)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = paste0(round(percentage, 1), "%")), position = position_stack(vjust = 0.5)) +  # 수치 표시
+  coord_polar("y") +
+  facet_wrap(~ 언론사, ncol = 7, nrow = 1) +  # 1x7 그리드 설정
+  theme_void() +
+  theme(legend.position = "bottom") -> kk
+
+kk
+
+ggsave('언론사별 긍정 부정 중립 문서 비율.png', plot = kk, width = 10, height = 6, dpi = 300)
+```
+
+```{r}
+# 월별로 긍정, 부정 문서의 개수를 계산
+monthly_sentiment <- filtered_data %>%
+  mutate(YearMonth = substr(일자, 1, 6)) %>%
+  group_by(YearMonth, 언론사, sentiment) %>%
+  summarise(count = n()) %>%
+  mutate(sentiment = factor(sentiment, levels = c("긍정", "부정"))) 
+
+monthly_sentiment
+
+# NA(중립)를 제거
+monthly_sentiment <- monthly_sentiment[complete.cases(monthly_sentiment), ]
+
+# 언론사별로 누적 막대 그래프
+for (media in unique(monthly_sentiment$언론사)) {
+  media_data <- subset(monthly_sentiment, 언론사 == media)
+
+  p <- ggplot(media_data, aes(x = YearMonth, y = count, fill = sentiment)) +
+    geom_bar(stat = "identity", position = "stack") +
+    theme_minimal() +
+    labs(title = paste("언론사:", media), x = "월별", y = "문서 개수", fill = "Sentiment") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+  print(p)
+}
+```
+
+
+```{r}
+monthly_sentiment
+
+# 각 각의 긍정, 부정 문서 카운트
+monthly_sentiment %>%
+  group_by(언론사, sentiment) %>%
+  filter(YearMonth == 202002) %>%
+  ggplot(aes(x = 언론사, y = count, fill = sentiment)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  labs(title = "2020년 2월 언론사별 긍정과 부정 문서 개수",
+       x = "언론사",
+       y = "문서 개수",
+       fill = "Sentiment") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+monthly_sentiment %>%
+  group_by(언론사, sentiment) %>%
+  filter(YearMonth == 202002) %>%
+  ggplot(aes(x = 언론사, y = count, fill = sentiment)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  theme_minimal() +
+  labs(title = "2020년 2월 언론사별 긍정과 부정 문서 개수",
+       x = "언론사",
+       y = "문서 개수",
+       fill = "Sentiment") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r}
+#2월
+monthly_sentiment %>%
+  group_by(언론사, sentiment) %>%
+  filter(YearMonth == 2020-02) %>%
+  ggplot(aes(x = 언론사, y = count, fill = sentiment)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  theme_minimal() +
+  labs(title = "2020년 2월 언론사별 긍정과 부정 문서 개수",
+       x = "언론사",
+       y = "문서 개수",
+       fill = "Sentiment") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+
+```{r}
+monthly_sentiment %>%
+  filter(YearMonth == 202002) %>%
+  group_by(언론사) %>%
+  mutate(total_count = sum(count)) %>%
+  mutate(percentage = count / total_count * 100) %>%
+  ggplot(aes(x = 언론사, y = percentage, fill = sentiment)) +
+  geom_bar(stat = "identity", position = "fill") +
+  theme_minimal() +
+  labs(title = "2020년 2월 언론사별 긍정과 부정 문서 비율",
+       x = "언론사",
+       y = "비율 (%)",
+       fill = "Sentiment") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+```{r}
+# 년도랑 월 설정
+year_months <- c("202002", "202003", "202004", "202005", "202006", "202007", "202008", "202009", "202010", "202011", "202012", "202101")
+
+# 루프로 그래프 출력
+for (year_month in year_months) {
+  tmp <- monthly_sentiment %>%
+    filter(YearMonth == year_month) %>%
+    group_by(언론사) %>%
+    mutate(total_count = sum(count)) %>%
+    mutate(percentage = count / total_count * 100) %>%
+    ggplot(aes(x = 언론사, y = percentage, fill = sentiment)) +
+    geom_bar(stat = "identity", position = "fill") +
+    theme_minimal() +
+    labs(title = paste(year_month, "언론사별 긍정과 부정 문서 비율"),
+         x = "언론사",
+         y = "비율 (%)",
+         fill = "Sentiment") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+  print(tmp)
+}
+```
+
+
+
+## 언론사 평균 비교(1)
+```{r}
+library(rstatix)
+
+# 언론사별 평균 sScore 점수 계산
+mean_sScore <- filtered_data %>%
+  group_by(언론사) %>%
+  summarise(mean_sScore = mean(total_sScore))
+
+mean_sScore
+
+filtered_data
+
+# post-hoc test (Tukey's HSD)
+posthoc_result <- filtered_data %>%
+  tukey_hsd(total_sScore ~ 언론사)
+
+posthoc_result
+
+# ...
+mean_sScore %>%
+  tukey_hsd(mean_sScore ~ 언론사)
+
+```
+
+## 언론사 평균 비교(2)_KBS, SBS, MBC
+### 등분산성 검정
+```{r}
+library(car)
+
+# 언론사 목록
+unit_3_m <- c("KBS", "SBS", "MBC")
+
+# 언론사들의 데이터만 필터링
+filtered_data_3m <- filtered_data %>%
+  filter(언론사 %in% unit_3_m)
+
+# 등분산성 검정
+levene_test_result <- leveneTest(total_sScore ~ 언론사, data = filtered_data_3m)
+print(levene_test_result)  #등분산성 x
+
+filtered_data_3m %>%
+  tukey_hsd(total_sScore ~ 언론사)
+```
+
+
+```{r}
+install.packages("kableExtra")
+library(kableExtra)
+
+tukey_result <- filtered_data_4m %>%
+  tukey_hsd(total_sScore ~ 언론사)
+
+tukey_result_table <- as.data.frame(tukey_result$`언론사`)
+
+kable_table <- kable(tukey_result_table, format = "html", table.attr = "class='table'")
+kable_image <- as_image(kable_table)
+
+# 이미지 파일로 저장
+save_kable(kable_image, file = "tukey_result_table.png")
+```
+
+
+#### 상자수염그림
+```{r}
+# 상자수염 그림 그리기
+ggplot(merged_data, aes(x = 언론사, y = mean_emotion_m)) +
+  geom_boxplot() +
+  stat_summary(fun = mean, geom = "point", shape = 18, size = 3, color = "skyblue") +  # 평균값을 빨간색 점으로 표시
+  geom_text(stat = "summary", fun = mean, vjust = -1, color = "red", aes(label = sprintf("%.2f", ..y..)), size = 3) +  # 평균값 텍스트 레이블 추가
+  labs(x = "언론사") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) -> tt
+
+ggsave("언론사 월별 평균 점수 상자수염그림.png", plot = tt, width = 10, height = 6, dpi = 300)
+```
+
+#### 경향, 조선, 중앙, 한겨례 검사
+```{r}
+# 언론사 목록
+unit_4_m <- c("경향신문", "조선일보", "중앙일보", "한겨레")
+
+# 언론사들의 데이터만 필터링
+filtered_data_4m <- filtered_data %>%
+  filter(언론사 %in% unit_4_m)
+
+# 등분산성 검정
+levene_test_result <- leveneTest(total_sScore ~ 언론사, data = filtered_data_4m)
+print(levene_test_result)  #등분산성 x
+
+filtered_data_4m %>%
+  tukey_hsd(total_sScore ~ 언론사)
+```
+
+### 표 저장
+```{r}
+
+```
+
+
+### Games-Howell 검정
+```{r}
+# r 버전....
+```
+
+
+
+# 세부분석
+## 특이 월 감성 흐름(4, 7, 8, 11)
+### 4월
+```{r}
+# 4월 데이터 추출
+april_data <- data %>%
+  filter(substr(일자, 1, 7) == "2020-04")
+
+# 일자로 묶기
+april_sum <- april_data %>%
+  group_by(일자) %>%
+  summarise(sum = sum(total_sScore))
+
+april_sum
+```
+
+```{r}
+# 꺾은선그래프
+ggplot(april_sum, aes(x = 일자, y = sum)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "4월 감성지수 변화",
+       x = "일자",
+       y = "수치") +
+  theme_minimal()
+```
+
+```{r}
+# 일자 열 날짜 형식으로 변환
+s_result$일자 <- as.Date(s_result$일자, format = "%Y%m%d")
+
+# 4월 16일 필터링
+april_result <- s_result %>%
+  filter(일자 == "2020-04-16")
+
+# 단어별 개수 내림차순
+april_result %>%
+  count(word, sort = TRUE)
+
+# 4.15일 총선, 16일 총선 결과 => 압승 표현 많음
+```
+
+### 7월
+```{r}
+# 7월 데이터 추출
+july_data <- data %>%
+  filter(substr(일자, 1, 7) == "2020-07")
+
+# 일자로 묶기
+july_sum <- july_data %>%
+  group_by(일자) %>%
+  summarise(sum = sum(total_sScore))
+
+july_sum
+```
+
+```{r}
+# 꺾은선그래프
+ggplot(july_sum, aes(x = 일자, y = sum)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "7월 감성지수 변화",
+       x = "일자",
+       y = "수치") +
+  theme_minimal()
+```
+
+
+```{r}
+# 7월 15일 필터링
+j7_result <- s_result %>%
+  filter(일자== "2020-07-15")
+
+# 단어별 개수 내림차순
+j7_result %>%
+  count(word, sort = TRUE) %>%
+  left_join(knu_dic_df, by = 'word')
+
+# 모더나 임상실험 성공, 국내 첫 임상실험 진행, 문제인 대통령 개원연설(뉴딜) 전 날
+```
+
+
+### 8월
+```{r}
+# 8월 데이터 추출
+aug_data <- data %>%
+  filter(substr(일자, 1, 7) == "2020-08")
+
+# 일자로 묶기
+aug_sum <- aug_data %>%
+  group_by(일자) %>%
+  summarise(sum = sum(total_sScore))
+
+aug_sum
+```
+
+```{r}
+# 꺾은선그래프
+ggplot(aug_sum, aes(x = 일자, y = sum)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "8월 감성지수 변화",
+       x = "일자",
+       y = "수치") +
+  theme_minimal()
+```
+
+```{r}
+# 8월16일 필터링
+aug16_result <- s_result %>%
+  filter(일자== "2020-08-16")
+
+# 단어별 개수 내림차순
+aug16_result %>%
+  count(word, sort = TRUE)
+```
+사랑 제일 교회 확진자 급증(16일)
+
+```{r}
+# 8월25일 필터링
+aug25_result <- s_result %>%
+  filter(일자== "2020-08-25")
+
+# 단어별 개수 내림차순
+aug25_result %>%
+  count(word, sort = TRUE) %>%
+  left_join(knu_dic_df, by = 'word')
+
+# 수능 100일전, 환자는 많지만 병실이 없다는 기사와 미국 FDA 국장의 '백신 개발 방해 세력 없다'는 발언이 많이 기사화  되어서 (-1점) 낮았음
+```
+
+### 11월
+```{r}
+# 8월 데이터 추출
+nov_data <- data %>%
+  filter(substr(일자, 1, 7) == "2020-11")
+
+# 일자로 묶기
+nov_sum <- nov_data %>%
+  group_by(일자) %>%
+  summarise(sum = sum(total_sScore))
+
+nov_sum
+
+
+s_result %>%
+  distinct(언론사)
+```
+
+```{r}
+# 꺾은선그래프
+ggplot(nov_sum, aes(x = 일자, y = sum)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "11월 감성지수 변화",
+       x = "일자",
+       y = "수치") +
+  theme_minimal()
+```
+
+
+```{r}
+# 11월 8일 필터링
+nov_result <- s_result %>%
+  filter(일자 == "2020-11-08")
+
+
+# 단어별 개수 내림차순
+nov_result %>%
+  count(word, sort = TRUE) %>%
+  left_join(knu_dic_df, by = 'word')
+
+
+# 바이든이 당선되어 뉴스 기사 헤드라인에 감성 점수 2점의 '승리'라는 표현이 주로 많이 사용되었음
+```
+
