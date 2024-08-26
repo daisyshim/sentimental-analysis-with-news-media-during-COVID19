@@ -1,0 +1,822 @@
+---
+title: "Newstitle_senti_y"
+output:
+  html_document: default
+  pdf_document:
+    latex_engine: xelatex
+date: '2023-07-18'
+---
+## packages
+```{r}
+#install.packages("epubr")
+#install.packages("RcppMeCab")
+library(epubr)
+library(RcppMeCab)
+
+pkg_v <- c("tidyverse", "tidytext", "epubr", 
+           "RcppMeCab", "KoNLP" )
+lapply(pkg_v, require, ch = T)
+```
+
+
+
+## 데이터, 라이브러리
+```{r}
+library(tidytext)
+library(tidyr)
+library(KoNLP)
+library(rJava)
+library(readxl)
+library(rlang)
+library(dplyr)
+
+getwd()
+setwd('C:/R programming/NewsResult')
+
+
+#2
+News2_1 <- read_excel("2월/NewsResult_20200201-20200206.xlsx")
+News2_2 <- read_excel("2월/NewsResult_20200207-20200213.xlsx")
+News2_3 <- read_excel("2월/NewsResult_20200214-20200220.xlsx")
+News2_4 <- read_excel("2월/NewsResult_20200221-20200224.xlsx")
+News2_5 <- read_excel("2월/NewsResult_20200225-20200226.xlsx")
+News2_6 <- read_excel("2월/NewsResult_20200227-20200229.xlsx")
+
+
+#3
+News3_1 <- read_excel("3월/NewsResult_20200301-20200303.xlsx")
+News3_2 <- read_excel("3월/NewsResult_20200304-20200305.xlsx")
+News3_3 <- read_excel("3월/NewsResult_20200306-20200309.xlsx")
+News3_4 <- read_excel("3월/NewsResult_20200310-20200311.xlsx")
+News3_5 <- read_excel("3월/NewsResult_20200312-20200315.xlsx")
+News3_6 <- read_excel("3월/NewsResult_20200316-20200317.xlsx")
+News3_7 <- read_excel("3월/NewsResult_20200318-20200319.xlsx")
+News3_8 <- read_excel("3월/NewsResult_20200320-20200323.xlsx")
+News3_9 <- read_excel("3월/NewsResult_20200324-20200325.xlsx")
+News3_10 <- read_excel("3월/NewsResult_20200326-20200329.xlsx")
+News3_11 <- read_excel("3월/NewsResult_20200330-20200331.xlsx")
+
+
+folder_path <- "4월"  
+file_list <- list.files(path = folder_path, full.names = TRUE)
+
+for(i in 1:length(file_list)) {
+  folder_path <- file_list[i]
+  assign(paste0("News4_", i), read_excel(folder_path))
+}
+
+
+folder_path <- "5월"  
+file_list <- list.files(path = folder_path, full.names = TRUE)
+
+for(i in 1:length(file_list)) {
+  folder_path <- file_list[i]
+  assign(paste0("News5_", i), read_excel(folder_path))
+}
+
+
+folder_path <- "6월"  
+file_list <- list.files(path = folder_path, full.names = TRUE)
+
+for(i in 1:length(file_list)) {
+  folder_path <- file_list[i]
+  assign(paste0("News6_", i), read_excel(folder_path))
+}
+
+
+folder_path <- "7월"  
+file_list <- list.files(path = folder_path, full.names = TRUE)
+
+for(i in 1:length(file_list)) {
+  folder_path <- file_list[i]
+  assign(paste0("News7_", i), read_excel(folder_path))
+}
+
+
+folder_path <- "8월"  
+file_list <- list.files(path = folder_path, full.names = TRUE)
+
+for(i in 1:length(file_list)) {
+  folder_path <- file_list[i]
+  assign(paste0("News8_", i), read_excel(folder_path))
+}
+
+
+folder_path <- "9월"  
+file_list <- list.files(path = folder_path, full.names = TRUE)
+
+for(i in 1:length(file_list)) {
+  folder_path <- file_list[i]
+  assign(paste0("News9_", i), read_excel(folder_path))
+}
+
+
+folder_path <- "10월"  
+file_list <- list.files(path = folder_path, full.names = TRUE)
+
+for(i in 1:length(file_list)) {
+  folder_path <- file_list[i]
+  assign(paste0("News10_", i), read_excel(folder_path))
+}
+
+
+folder_path <- "11월"  
+file_list <- list.files(path = folder_path, full.names = TRUE)
+
+for(i in 1:length(file_list)) {
+  folder_path <- file_list[i]
+  assign(paste0("News11_", i), read_excel(folder_path))
+}
+
+
+folder_path <- "12월"  
+file_list <- list.files(path = folder_path, full.names = TRUE)
+
+for(i in 1:length(file_list)) {
+  folder_path <- file_list[i]
+  assign(paste0("News12_", i), read_excel(folder_path))
+}
+
+
+folder_path <- "21_1월"  
+file_list <- list.files(path = folder_path, full.names = TRUE)
+
+for(i in 1:length(file_list)) {
+  folder_path <- file_list[i]
+  assign(paste0("News1_", i), read_excel(folder_path))
+}
+
+# 파일 읽
+data_list <- lapply(file_list, read_excel)
+data_list[[1]]
+
+
+News2 <- bind_rows(News2_1, News2_2, News2_3, News2_4, News2_5, News2_6)
+News3 <- bind_rows(News3_1, News3_2, News3_3, News3_4, News3_5, News3_6, News3_7, News3_8, News3_9, News3_10, News3_11)
+News4 <- bind_rows(News4_1, News4_2, News4_3, News4_4, News4_5, News4_6, News4_7, News4_8)
+News5 <- bind_rows(News5_1, News5_2, News5_3, News5_4, News5_5, News5_6, News5_7)
+News6 <- bind_rows(News6_1, News6_2, News6_3, News6_4, News6_5, News6_6)
+News7 <- bind_rows(News7_1, News7_2, News7_3, News7_4, News7_5, News7_6)
+News8 <- bind_rows(News8_1, News8_2, News8_3, News8_4, News8_5, News8_6)
+News9 <- bind_rows(News9_1, News9_2, News9_3, News9_4, News9_5, News9_6, News9_7)
+News10 <- bind_rows(News10_1, News10_2, News10_3, News10_4, News10_5)
+News11 <- bind_rows(News11_1, News11_2, News11_3, News11_4, News11_5, News11_6)
+News12 <- bind_rows(News12_1, News12_2, News12_3, News12_4, News12_5, News12_6, News12_7, News12_8)
+News1 <- bind_rows(News1_1, News1_2, News1_3, News1_4, News1_5, News1_6)
+
+News <- bind_rows(News2, News3, News4, News5, News6, News7, News8, News9, News10, News11, News12, News1)
+News <- News[order(News$일자), ]
+
+head(News)
+tail(News)
+```
+
+
+
+## 1.3 download lexicon
+```{r}
+url_v <- "https://github.com/park1200656/KnuSentiLex/archive/refs/heads/master.zip"
+dest_v <- "data/knusenti.zip"
+
+download.file(url = url_v, 
+              destfile = dest_v,
+              mode = "wb")
+
+list.files("data/.")
+```
+
+
+```{r}
+unzip("knusenti.zip", exdir = "data")
+list.files("data/.")
+```
+
+
+```{r}
+list.files("data/KnuSentiLex-master/.")
+```
+
+## 사전 내용 가져오기
+```{r}
+#9번째에 있는 파일 가져오기
+senti_name_v <- list.files("data/KnuSentiLex-master/.")[9]
+senti_name_v
+```
+
+```{r}
+read_lines(str_c("data/KnuSentiLex-master/", senti_name_v)) %>% head(10)
+```
+
+```{r}
+read_lines(str_c("data/KnuSentiLex-master/", senti_name_v)) %>% 
+  head(10) %>% str_extract("\t|\n| ")
+```
+
+```{r}
+read_tsv(str_c("data/KnuSentiLex-master/", senti_name_v)) %>% head(10)
+read_tsv(str_c("data/KnuSentiLex-master/", senti_name_v), col_names = F) %>% head(10)
+```
+
+```{r}
+senti_dic_df <- read_tsv(str_c("data/KnuSentiLex-master/", senti_name_v), col_names = F)
+head(senti_dic_df)
+```
+
+```{r}
+glimpse(senti_dic_df)
+```
+
+```{r}
+senti_dic_df[1-5, ]
+```
+
+### 열 이름 변경
+```{r}
+senti_dic_df <- senti_dic_df %>% 
+  rename(word = X1, sScore = X2)
+glimpse(senti_dic_df)
+```
+
+```{r}
+senti_dic_df %>% filter(sScore == 2) %>% arrange(word)
+senti_dic_df %>% filter(sScore == -2) %>% arrange(word)
+```
+
+```{r}
+senti_dic_df %>% count(sScore)
+```
+
+### 3단계로 분류..?(긍정, 중립, 부정)
+```{r}
+senti_dic_df %>% 
+  mutate(emotion = ifelse(sScore >= 1, "p", 
+                          ifelse(sScore <= -1, "n", "neutral"))) %>% 
+  count(emotion)
+```
+
+```{r}
+senti_dic_df$sScore %>% unique()
+```
+
+```{r}
+senti_dic_df %>% 
+  filter(is.na(sScore)) 
+```
+
+```{r}
+senti_dic_df %>% 
+  filter(!is.na(sScore)) %>% 
+  add_row(word = "갈등", sScore = -1) -> senti_dic_df 
+
+senti_dic_df %>% 
+  filter(!is.na(sScore)) %>%
+  count(sScore)
+```
+
+```{r}
+knu_dic_df <- senti_dic_df %>% 
+  filter(!is.na(sScore))
+```
+
+
+## 2. 토큰화, 형태소 추출
+```{r}
+#단어 단위 분석 후 결합
+s_time <- Sys.time()
+News %>%
+  unnest_tokens(output = word,
+                input = 제목) %>%
+  left_join(knu_dic_df, by = "word") -> News_t
+elap_time_xxx <- Sys.time() - s_time
+
+#결측값 0
+News_t$sScore[is.na(News_t$sScore)] <- 0
+News_t
+```
+
+```{r}
+#제목 붙이기
+News_data <- left_join(News_t, News[, c("뉴스 식별자", "제목")], by = "뉴스 식별자")
+```
+
+
+
+### 감성사전 결합
+- 감성 사전 단어(word)와 수치(sScore) 결합
+- 편하게 보려고 몇 개의 열만 따로 저장
+```{r}
+News_t1 <- News_t
+names(News_t)
+
+#'뉴스 식별자', 일자, 언론사, 기고자, 기관, 제목, pos_done, sScore만 따로 s_result에 저장
+s_result <- News_data %>% 
+  select('뉴스 식별자', 일자, 언론사, 기고자, 기관, 제목, word, sScore)
+```
+### 특수문자, 숫자 제거
+```{r}
+# 특수문자와 숫자 제거
+s_result %>%
+  mutate(word = str_replace_all(word, "[[:punct:][:digit:]ㆍ]", "")) %>%
+  filter(word != "") -> s_result1
+
+# 한 글자 행 제거 
+s_result1 %>%
+  filter(nchar(word) > 1) -> s_result
+
+# '대상' 불용어 판정으로 제거
+s_result %>%
+  filter(word != '대상') -> s_result
+```
+
+
+## 감성 어휘 빈도 계산
+### 모든 단어(중립, 긍정, 부정)
+```{r}
+#모든 단어
+s_result %>%
+  count(word, sScore, sort = T) %>%
+  filter(str_length(word) > 1) %>%
+  mutate(word = reorder(word, n)) %>%
+  slice_head(n=20) %>%
+  ggplot() + geom_col(aes(n, word, fill = sScore), show.legend = F)
+```
+
+
+```{r}
+s_result %>%
+  count(word, sScore, sort = T) %>%
+  mutate(word = reorder(word, n)) %>%
+  slice_head(n=20) %>%
+  ggplot() + geom_col(aes(n, word, fill = sScore), show.legend = F)
+```
+
+
+```{r}
+#위의 도표
+s_result %>%
+  count(word, sScore, sort = TRUE) %>%
+  filter(str_length(word) > 1) %>%
+  mutate(word = reorder(word, n)) %>%
+  slice_head(n = 20) %>%
+  ggplot() +
+  geom_col(aes(n, word, fill = sScore), show.legend = FALSE) +
+  theme_minimal() +  # 테마 변경
+  labs(x = "Count", title = "Top 20") +  # 축 레이블 및 제목 추가
+  theme(
+    axis.text = element_text(size = 10),  # 축 텍스트 크기
+    axis.title = element_text(size = 12),  # 축 레이블 크기와 굵기
+    plot.title = element_text(size = 18, face = "bold"),  # 그래프 제목 크기와 굵기
+    panel.grid.major.y = element_line(color = "gray90"),  # 가로 그리드 선 색상
+    panel.grid.minor = element_blank()  # 세로 그리드 선 제거
+  ) -> gg
+
+gg
+```
+
+```{r}
+ggsave("전체 토큰 top20.png", plot = gg, width = 10, height = 6, dpi = 300)
+```
+
+
+
+### 극성 단어
+```{r}
+s_result %>%
+  filter(sScore != 0) %>%
+  count(word, sScore, sort = T) %>%
+  filter(str_length(word) > 1) %>%
+  mutate(word = reorder(word, n)) %>%
+  slice_head(n=20) %>%
+  ggplot() + geom_col(aes(n, word, fill = sScore), show.legend = F)
+```
+
+```{r}
+#위의 도표
+s_result %>%
+  filter(sScore != 0) %>%
+  count(word, sScore, sort = T) %>%
+  filter(str_length(word) > 1) %>%
+  mutate(word = reorder(word, n)) %>%
+  slice_head(n=20) %>%
+  ggplot(aes(x = n, y = word)) +
+  geom_col(show.legend = FALSE) +
+  labs(x = "count", y = "Word", title = "Top 20") +
+  theme_minimal() +
+  theme(axis.text.y = element_text(size = 10), axis.title = element_text(size = 12))
+```
+
+
+## 감성점수 계산
+### 극성별 분류
+```{r}
+s_result %>%
+  arrange(sScore)
+
+head(s_result)
+
+#극성별 분류 << 단어 개수로 세어 본 것
+s_result %>%
+  count(sScore)
+```
+
+```{r}
+#3수준으로 줄인 경우
+s_result %>%
+  mutate(sScore = ifelse(sScore >= 1, "긍정",
+                         ifelse(sScore <= -1, "부정", "중립"))) %>% 
+  count(sScore)
+```
+
+
+### 감성점수 계산
+```{r}
+s_result %>%
+  summarise(emotion = sum(sScore))
+```
+
+### -2 감성 단어 빈도
+```{r}
+s_result %>%
+  filter(sScore == -2) %>%
+  count(word, sort = T)
+```
+
+
+
+
+## 감성 극성별 단어 빈도
+```{r}
+#긍정 단어
+result_pos <- s_result %>%
+  filter(sScore > 0) %>%
+  count(word, sort = T)
+
+head(result_pos)
+```
+
+```{r}
+#부정 단어
+result_neg <- s_result %>%
+  filter(sScore < 0) %>%
+  count(word, sort = T) 
+
+head(result_neg)
+```
+
+```{r}
+#감성 극성 단어 빈도 시각화
+s_result %>%
+  mutate(emotion = ifelse(sScore > 0, "긍정", ifelse(sScore < 0, "부정", "중립"))) %>% 
+  filter(emotion != "중립") %>% 
+  count(word, emotion, sort = T) -> s_result_count
+  
+s_result_count %>%
+  group_by(emotion) %>%
+  top_n(10) %>%
+  ungroup() %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(word, n)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~emotion, scales = "free_y") +
+  labs(y = "단어 빈도") +
+  coord_flip() -> gg
+
+gg
+```
+
+
+```{r}
+#이미지 저장
+ggsave("긍정 부정 단어 top10.png", plot = gg, width = 10, height = 6, dpi = 300)
+```
+
+
+
+```{r}
+#워드클라우드로 표시
+library(wordcloud2)
+#install.packages('tm')
+library(tm)
+#install.packages('wordcloud')
+library(wordcloud)
+#install.packages("reshape2")
+library(reshape2)
+
+s_result %>%
+  mutate(emotion = ifelse(sScore > 0, "긍정", ifelse(sScore < 0, "부정", "중립"))) %>% 
+  filter(emotion != "중립") %>% 
+  count(word, emotion, sort = T)
+
+s_result %>%
+  mutate(emotion = ifelse(sScore > 0, "긍정", ifelse(sScore < 0, "부정", "중립"))) %>% 
+  filter(emotion != "중립") %>% 
+  count(word, emotion, sort = T) %>% 
+  reshape2::acast(word ~ emotion, value.var = "n", fill = 0) %>% 
+  comparison.cloud(colors = c("blue", "red"), max.words = 50)
+```
+
+
+
+## 감성변화
+```{r}
+ s_result %>%
+  count(일자, sScore) %>%
+  spread(sScore, n ,fill = 0) -> spread_result
+
+# 열 이름 수정
+names(spread_result) <- c("일자", "-2", "-1", "0", "1", "2")
+
+# 열에 해당하는 숫자를 계산하여 새로운 열에 더하기
+data_result <- spread_result %>%
+  mutate(emotion = (-2 * `-2`) + (-1 * `-1`) + (0 * `0`) + (1 * `1`) + (2 * `2`))
+
+# 결과 출력
+data_result
+
+#일별 변화
+data_result %>%
+  mutate(일자 = substr(일자, nchar(일자) - 4, nchar(일자))) %>%
+  ggplot(aes(일자, emotion)) +
+  geom_col(show.legend = FALSE)
+
+```
+
+```{r}
+data_result %>%
+  mutate(일자 = substr(일자, nchar(일자) - 4, nchar(일자))) %>%
+  ggplot(aes(일자, emotion, group=1)) +
+  geom_point() +
+  geom_line() 
+```
+
+
+### 월별 변화
+```{r}
+data_result$year <- substr(data_result$일자, 1, 4)
+data_result$month <- substr(data_result$일자, 5, 6)
+data_result$day <- substr(data_result$일자, 7, 8)
+data_result
+
+#그룹화해서 월별로 emotion열 합 계산
+data_result %>%
+  group_by(year, month) %>%
+  summarize(sum_emotion = sum(emotion)) %>%
+  ggplot(aes(factor(month, levels = c("02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "01")), sum_emotion, group=1)) +
+  geom_point() +
+  geom_line() +
+  labs(x='Month', y='Sum Emotion')
+```
+
+```{r}
+# 일자 열 날짜 형식으로 변환
+s_result$일자 <- as.Date(s_result$일자, format = "%Y%m%d")
+
+s_result %>%
+  group_by(YearMonth = format(일자, "%Y-%m")) %>%
+  summarize(sum_emotion = sum(sScore)) %>%
+  ggplot(aes(x=YearMonth, y=sum_emotion, group=1)) +
+  geom_point() +
+  geom_line() +
+  labs(x = "Month", y = "Sum Emotion") +
+  theme_minimal() -> gg
+
+
+gg
+
+ggsave("월별 감성 변화.png", plot = gg, width = 10, height = 6, dpi = 300)
+
+```
+
+
+
+## 일별 전체 문서 분모, 긍정 문서 부정 문서 분자로 비율 구하
+```{r}
+# - (1) 뉴스 번호 별로 묶어서 감성 점수 총합 구하기 
+# - (2) 총합을 이용하여 긍정 문서인지 부정 문서인지 분류
+# - (3) 일별로 출고된 기사 개수 count
+# - (4) 분모 분자로 만들어서 일별 비율 계산
+s_result1 <- s_result %>%
+  rename(식별자 = "뉴스 식별자")
+
+s_result1 %>%
+  group_by(식별자) %>%
+  summarize(total_sScore = sum(sScore)) %>%
+  left_join(s_result1, by = "식별자") %>%
+  select(식별자, 일자, 언론사, 기고자, 제목, total_sScore) -> s_result2 #1
+
+
+s_result2 %>%
+  mutate(emotion = ifelse(total_sScore >= 1, "긍정",
+                         ifelse(total_sScore <= -1, "부정", "중립"))) -> s_result2  #2
+
+# 중복을 제거하고 유일한 행들만 선택
+s_result2 <- distinct(s_result2)
+
+s_result2 %>%
+  group_by(일자) %>%
+  summarize(분모 = n()) %>%
+  left_join(s_result2, by = '일자') %>%
+  select(식별자, 일자, 언론사, 기고자, 제목, total_sScore, emotion, 분모) -> s_result3  #3
+  
+s_result2 %>%
+  arrange(일자) #개수 동일함 확인
+
+
+s_result3 %>%
+  group_by(일자, emotion) %>%
+  summarize(분자 = n()) -> s_result4
+
+
+tmp <- s_result3 %>%
+  select(일자, 분모) %>%
+  unique()
+
+
+s_result4 %>%
+  left_join(tmp, by = '일자') %>%
+  mutate(비율 = 분자/분모,
+        일자 = format(일자, "%Y-%m")) %>%
+  ggplot(aes(일자, 비율, emotion)) +
+  geom_col(aes(fill=emotion), position="dodge")  #4.1
+
+
+s_result4 %>%
+  left_join(tmp, by = '일자') %>%
+  mutate(일자 = format(일자, '%m-%d'),
+         분모1 = 분모/3) %>%
+  ggplot(aes(일자, 분자, fill = emotion)) +
+  geom_bar(stat = "identity", position = "stack") +  # position = "stack" 추가
+  labs(y = '기사 수')  #4.2  
+
+s_result4 %>%
+  left_join(tmp, by = '일자') %>%
+  filter(emotion != '중립') %>%
+  mutate(일자 = format(일자, '%y-%m')) %>%
+  group_by(일자, emotion) %>%
+  summarise(sum = sum(분자)) %>%
+  ggplot(aes(일자, sum, fill = emotion)) +
+  geom_bar(stat = "identity", position = "dodge") + 
+  theme_minimal()+
+  labs(y = '기사 수') -> qq  #4.3 
+  
+qq
+```
+
+
+```{r}
+ggsave("월별 긍부정 기사 개수.png", plot = qq, width = 10, height = 6, dpi = 300)
+```
+
+### 월별 긍정, 부정 기사 막대그래프
+```{r}
+s_result41 <- s_result4
+s_result41$일자 <- format(s_result41$일자, format = '%Y%m%d')
+  
+s_result41$year <- substr(s_result41$일자, 1, 4)
+s_result41$month <- substr(s_result41$일자, 5, 6)
+s_result41$day <- substr(s_result41$일자, 7, 8)
+
+s_result41 %>%
+  filter(emotion != '중립') %>%
+  group_by(year, month, emotion) %>%
+  summarize(개수 = sum(분자)) %>%
+  ggplot(aes(x = month, y = 개수, fill = emotion)) +
+  geom_col(position = "dodge", show.legend = TRUE) +
+  labs(x = "Month", y = "Count", fill = "Emotion") +
+  theme_minimal() -> qq
+
+qq
+```
+
+### 단어들의 월별 출현 빈도
+```{r}
+library(lubridate)
+#install.packages("viridis")
+library(viridis)
+
+library(dplyr)
+library(ggplot2)
+library(gridExtra)
+
+# 각 단어별 그래프를 저장할 리스트 생성
+gg_list <- list()
+
+# neg_n_pos 데이터 속 단어들에 대해 반복하여 그래프 생성
+for (i in 1:nrow(neg_n_pos)) {
+  tmp <- neg_n_pos$word[i]
+  gg_plot <- s_result %>%
+    filter(word == tmp) %>%
+    mutate(월 = format(일자, '%Y-%m')) %>%
+    group_by(월) %>%
+    summarise(출현빈도 = n()) %>%
+    ggplot(aes(x = 월, y = 출현빈도, group = 1)) +  # 그룹 설정
+    geom_line() +
+    labs(title = paste(tmp)) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    scale_x_discrete(breaks = NULL)
+  gg_list[[i]] <- gg_plot
+}
+
+# 5x4 그리드로 그래프 출력
+grid.arrange(grobs = gg_list, ncol = 5)
+```
+
+```{r}
+# 이미지로 저장할 경로 및 파일명 지정
+output_path <- "월별 단어 출현빈도.png"  # 원하는 경로와 파일명으로 수정
+
+# 그래프를 이미지로 저장
+ggsave(output_path, plot = grid.arrange(grobs = gg_list, ncol = 5), width = 10, height = 8, dpi = 300)
+```
+
+
+## 언론사별 감성분석
+```{r}
+s_result1 <- s_result
+
+
+s_result1 <- s_result1 %>% rename(식별자 = '뉴스 식별자')
+
+test <- head(s_result1)
+
+test %>%
+  group_by(식별자, 언론사) %>%
+  summarise(count = n())
+
+s_result %>%
+  group_by(언론사) %>%
+  summarise(count = n()) %>%
+  arrange(-count)
+
+s_result1 %>%
+  group_by(식별자, 언론사) %>%
+  summarise(count = n())-> test
+
+unique(test$언론사)
+
+test %>%
+  arrange(-count)
+
+
+#확인
+s_result2$언론사 %>%
+  unique()
+
+#언론사별 기사 수 
+s_result2 %>%
+  group_by(언론사) %>%
+  summarise(count = n()) %>%
+  arrange(-count)
+  
+
+s_result1 %>%
+  group_by(언론사) %>%
+  summarize(total_sScore = sum(sScore),
+            count = n(),
+            mean = total_sScore / count) 
+```
+
+### 언론사별 감성 분석
+```{r}
+# - 언론사별 감성 점수 합 구하기
+# - 언론사별 평균 감성 점수
+s_result1 %>%
+  group_by(언론사) %>%
+  summarize(total_sScore = sum(sScore)) -> cast_result  # 점수 합
+
+News %>%
+  count(언론사) -> n_cast  #발행 개수
+
+cast_result %>%
+  inner_join(n_cast, by = '언론사') %>%
+  mutate(mean_s = total_sScore/n) -> mean_cast   #평균
+
+mean_cast %>%
+  arrange(desc(n)) %>%
+  top_n(20, n) -> mean_cast_20
+  
+```
+
+```{r}
+# One-way ANOVA 수행
+anova_result <- aov(mean_s ~ 언론사, data = mean_cast_20)
+
+# ANOVA 결과 요약
+summary(anova_result)
+```
+
+### 언론사별 긍정 문서 개수 
+```{r}
+s_result1 %>%
+  group_by(식별자, 언론사) %>%
+  mutate(sum_s = sum(sScore)) %>%
+  select(식별자, 일자, 언론사, sum_s) -> g
+
+g %>% unique()
+
+
+s_result3
+```
+
+
